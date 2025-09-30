@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
+    />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <title>Todo App</title>
+  </head>
+  <body>
+    <h1>Todo App</h1>
+    <div class="wrapper">
+      <header class="app-header">
+        <div id="auth-status" aria-live="polite"></div>
+        <button id="logout-button" class="hidden" type="button">Logout</button>
+      </header>
+
+      <section id="auth-section">
+        <div class="auth-panels">
+          <form id="login-form" autocomplete="off">
+            <h2>Login</h2>
+            <input
+              id="login-username"
+              name="username"
+              type="text"
+              placeholder="Username"
+              required
+              minlength="3"
+              maxlength="32"
+              pattern="[A-Za-z0-9_\-.]+"
+            />
+            <input
+              id="login-password"
+              name="password"
+              type="password"
+              placeholder="Password"
+              required
+              minlength="6"
+              maxlength="128"
+            />
+            <button type="submit">Login</button>
+          </form>
+
+          <form id="signup-form" autocomplete="off">
+            <h2>Sign Up</h2>
+            <input
+              id="signup-username"
+              name="username"
+              type="text"
+              placeholder="Username"
+              required
+              minlength="3"
+              maxlength="32"
+              pattern="[A-Za-z0-9_\-.]+"
+            />
+            <input
+              id="signup-password"
+              name="password"
+              type="password"
+              placeholder="Password"
+              required
+              minlength="6"
+              maxlength="128"
+            />
+            <button type="submit">Create Account</button>
+          </form>
+        </div>
+        <p class="auth-hint">
+          Usernames: letters, numbers, underscore, dash, dot. Password min 6
+          chars.
+        </p>
+      </section>
+
+      <section id="app-section" class="hidden">
+        <form id="todo-form" autocomplete="off">
+          <input
+            id="todo-input"
+            type="text"
+            placeholder="Add a todo"
+            autocomplete="off"
+            maxlength="200"
+            pattern=".*\S.*"
+            aria-label="Todo text"
+          />
+          <button id="add-button" type="submit">ADD</button>
+        </form>
+        <ul id="todo-list"></ul>
+      </section>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
