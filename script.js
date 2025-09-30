@@ -14,16 +14,39 @@
   const input = document.getElementById("todo-input");
   const list = document.getElementById("todo-list");
 
-  // Auth elements
-  const loginForm = document.getElementById("login-form");
-  const signupForm = document.getElementById("signup-form");
+  // Auth elements (simple email/password card)
+  const emailAuthForm = document.getElementById("email-auth-form");
+  const authEmail = document.getElementById("auth-email");
+  const authPassword = document.getElementById("auth-password");
+  const authToggle = document.getElementById("auth-toggle");
+  const authError = document.getElementById("auth-error");
+  const appHeader = document.getElementById("app-header");
   const logoutButton = document.getElementById("logout-button");
-  const authSection = document.getElementById("auth-section");
   const appSection = document.getElementById("app-section");
   const authStatus = document.getElementById("auth-status");
 
-  function loadTodosFromStorage() {
+  async function loadTodosFromStorage() {
     try {
+      // Prefer Supabase if configured and session exists
+      const sUser = await getSupabaseUser();
+      if (sUser) {
+        const { data, error } = await window.supabaseClient
+          .from("todos")
+          .select("id, text, completed")
+          .eq("user_id", sUser.id)
+          .order("created_at", { ascending: false });
+        if (error) throw error;
+        return Array.isArray(data)
+          ? data
+              .map((r) => ({
+                id: r.id,
+                text: r.text,
+                completed: !!r.completed,
+              }))
+              .filter(isValidTodo)
+          : [];
+      }
+
       const user = currentUser();
       if (!user) return [];
       const all = loadAllTodos();
@@ -34,7 +57,25 @@
     }
   }
 
-  function saveTodosToStorage() {
+  async function saveTodosToStorage() {
+    const sUser = await getSupabaseUser();
+    if (sUser) {
+      // Replace remote state with local snapshot (simple sync)
+      await window.supabaseClient
+        .from("todos")
+        .delete()
+        .eq("user_id", sUser.id);
+      if (todos.length > 0) {
+        const rows = todos.map((t) => ({
+          id: t.id,
+          user_id: sUser.id,
+          text: t.text,
+          completed: t.completed,
+        }));
+        await window.supabaseClient.from("todos").insert(rows);
+      }
+      return;
+    }
     const user = currentUser();
     if (!user) return;
     const all = loadAllTodos();
@@ -60,6 +101,16 @@
       typeof item.text === "string" &&
       typeof item.completed === "boolean"
     );
+  }
+
+  async function getSupabaseUser() {
+    try {
+      if (!window.supabaseClient) return null;
+      const { data } = await window.supabaseClient.auth.getUser();
+      return data && data.user ? data.user : null;
+    } catch {
+      return null;
+    }
   }
 
   function currentUser() {
@@ -130,17 +181,35 @@
         </svg>
       `;
 
-      checkbox.addEventListener("change", () => {
+      checkbox.addEventListener("change", async () => {
         todo.completed = checkbox.checked;
-        saveTodosToStorage();
+        const sUser = await getSupabaseUser();
+        if (sUser) {
+          await window.supabaseClient
+            .from("todos")
+            .update({ completed: todo.completed })
+            .eq("id", todo.id)
+            .eq("user_id", sUser.id);
+        } else {
+          await saveTodosToStorage();
+        }
         render();
       });
 
-      deleteBtn.addEventListener("click", () => {
+      deleteBtn.addEventListener("click", async () => {
         const ok = confirm("Delete this todo?");
         if (!ok) return;
         todos = todos.filter((t) => t.id !== todo.id);
-        saveTodosToStorage();
+        const sUser = await getSupabaseUser();
+        if (sUser) {
+          await window.supabaseClient
+            .from("todos")
+            .delete()
+            .eq("id", todo.id)
+            .eq("user_id", sUser.id);
+        } else {
+          await saveTodosToStorage();
+        }
         render();
       });
 
@@ -152,7 +221,7 @@
     }
   }
 
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const value = input.value;
     const newTodo = createTodo(value);
@@ -164,7 +233,17 @@
     }
     todos.unshift(newTodo);
     input.value = "";
-    saveTodosToStorage();
+    const sUser = await getSupabaseUser();
+    if (sUser) {
+      await window.supabaseClient.from("todos").insert({
+        id: newTodo.id,
+        user_id: sUser.id,
+        text: newTodo.text,
+        completed: newTodo.completed,
+      });
+    } else {
+      await saveTodosToStorage();
+    }
     render();
   });
 
@@ -229,70 +308,65 @@
 
   function updateAuthUI() {
     const user = currentUser();
-    authStatus.textContent = user ? `Signed in as ${user}` : "Not signed in";
-    logoutButton.classList.toggle("hidden", !user);
-    authSection.classList.toggle("hidden", !!user);
-    appSection.classList.toggle("hidden", !user);
+    if (authStatus) authStatus.textContent = user ? `Signed in as ${user}` : "";
+    if (logoutButton) logoutButton.classList.toggle("hidden", !user);
+    const authCard = document.getElementById("auth-card");
+    if (authCard) authCard.classList.toggle("hidden", !!user);
+    if (appHeader) appHeader.classList.toggle("hidden", !user);
+    if (appSection) appSection.classList.toggle("hidden", !user);
   }
 
-  if (loginForm) {
-    loginForm.addEventListener("submit", async (e) => {
+  if (emailAuthForm) {
+    let signupMode = false;
+    if (authToggle) {
+      authToggle.addEventListener("click", () => {
+        signupMode = !signupMode;
+        const submit = document.getElementById("auth-submit");
+        if (submit)
+          submit.textContent = signupMode ? "Create account" : "Login";
+        authToggle.textContent = signupMode
+          ? "Already have an account? Login"
+          : "Don't have an account? Sign up";
+      });
+    }
+
+    emailAuthForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const username = document.getElementById("login-username").value.trim();
-      const password = document.getElementById("login-password").value;
-      if (!validateUsername(username) || !validatePassword(password)) {
-        alert("Invalid credentials format.");
+      if (authError) authError.classList.add("hidden");
+      const email = authEmail ? authEmail.value.trim() : "";
+      const password = authPassword ? authPassword.value : "";
+      if (!email || password.length < 6) {
+        if (authError) {
+          authError.textContent = "Enter a valid email and 6+ char password";
+          authError.classList.remove("hidden");
+        }
         return;
       }
-      const db = loadUserDb();
-      const record = db[username];
-      if (!record) {
-        alert("Account not found. Please sign up.");
-        return;
+      // If Supabase configured, use it; else fallback to local pseudo-auth keyed by email
+      if (window.supabaseClient) {
+        const { error } = signupMode
+          ? await window.supabaseClient.auth.signUp({ email, password })
+          : await window.supabaseClient.auth.signInWithPassword({
+              email,
+              password,
+            });
+        if (error) {
+          if (authError) {
+            authError.textContent = error.message;
+            authError.classList.remove("hidden");
+          }
+          return;
+        }
       }
-      const salt = fromHex(record.salt);
-      const hash = await hashPassword(password, salt);
-      if (toHex(hash) !== record.hash) {
-        alert("Incorrect password.");
-        return;
-      }
-      setSession(username);
+      setSession(email);
       const all = loadAllTodos();
-      todos = Array.isArray(all[username])
-        ? all[username].filter(isValidTodo)
-        : [];
+      todos = Array.isArray(all[email]) ? all[email].filter(isValidTodo) : [];
       updateAuthUI();
       render();
     });
   }
 
-  if (signupForm) {
-    signupForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const username = document.getElementById("signup-username").value.trim();
-      const password = document.getElementById("signup-password").value;
-      if (!validateUsername(username) || !validatePassword(password)) {
-        alert("Invalid username or password.");
-        return;
-      }
-      const db = loadUserDb();
-      if (db[username]) {
-        alert("Username already exists.");
-        return;
-      }
-      const salt = crypto.getRandomValues(new Uint8Array(16));
-      const hash = await hashPassword(password, salt);
-      db[username] = { salt: toHex(salt), hash: toHex(hash) };
-      saveUserDb(db);
-      setSession(username);
-      const all = loadAllTodos();
-      if (!Array.isArray(all[username])) all[username] = [];
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
-      todos = all[username];
-      updateAuthUI();
-      render();
-    });
-  }
+  // remove legacy signup form logic (now handled by emailAuthForm)
 
   if (logoutButton) {
     logoutButton.addEventListener("click", () => {
@@ -304,13 +378,15 @@
   }
 
   // Initialize by session
-  const user = currentUser();
-  if (user) {
-    const all = loadAllTodos();
-    todos = Array.isArray(all[user]) ? all[user].filter(isValidTodo) : [];
-  } else {
-    todos = [];
-  }
-  updateAuthUI();
-  render();
+  (async function init() {
+    const user = currentUser();
+    if (user) {
+      const fromStore = await loadTodosFromStorage();
+      todos = Array.isArray(fromStore) ? fromStore : [];
+    } else {
+      todos = [];
+    }
+    updateAuthUI();
+    render();
+  })();
 })();
