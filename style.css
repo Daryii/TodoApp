@@ -9,6 +9,14 @@
   --muted: #a9a4a4;
 }
 
+:root.light {
+  --background-color: #f7f7f8;
+  --text-color: #1a1a1a;
+  --surface-1: #ffffff;
+  --surface-2: #e9e9ee;
+  --muted: #6b7280;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -34,6 +42,18 @@ h1 {
   letter-spacing: 0.4px;
 }
 
+#theme-toggle {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  background: var(--surface-1);
+  color: var(--text-color);
+  border: 1px solid #3a2d2d;
+  border-radius: 999px;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
 .wrapper {
   width: min(640px, 92vw);
   padding-bottom: 32px;
@@ -44,28 +64,37 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 50vh;
+  min-height: 70vh;
 }
 
 .card {
   width: 100%;
-  background: var(--surface-1);
-  border: 1px solid #352929;
-  border-radius: 14px;
-  padding: 20px;
+  max-width: 480px;
+  background: #1f1717;
+  border: 1px solid #3a2b2b;
+  border-radius: 16px;
+  padding: 24px 20px 18px 20px;
   display: grid;
-  gap: 10px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35),
+  gap: 12px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.38),
     inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
+.card h2 {
+  font-size: 28px;
+  letter-spacing: 0.2px;
+}
 .muted {
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  margin-top: -4px;
 }
 .secondary {
-  background: #3c2f2f;
+  background: transparent;
   color: var(--secondary-color);
+  border: 1px solid #3a2d2d;
+  border-radius: 10px;
+  padding: 10px 12px;
 }
 .error {
   color: #ff8a80;
@@ -89,6 +118,20 @@ input[type="password"] {
   padding: 12px 14px;
   outline: none;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card input[type="email"],
+.card input[type="password"] {
+  background: #140f0f;
+  border: 1px solid #4a3737;
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.card input[type="email"]:focus,
+.card input[type="password"]:focus {
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.06);
 }
 
 input[type="text"]::placeholder,
@@ -121,6 +164,20 @@ input[type="password"]:focus {
   cursor: pointer;
   font-weight: 600;
   transition: transform 0.06s ease, filter 0.12s ease, box-shadow 0.12s ease;
+}
+
+#auth-submit {
+  width: 100%;
+  background: var(--accent-color);
+  color: #120b0b;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-weight: 700;
+}
+
+#auth-submit:hover {
+  filter: brightness(1.05);
 }
 
 #add-button:hover {

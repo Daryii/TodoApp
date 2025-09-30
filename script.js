@@ -13,6 +13,7 @@
   const form = document.getElementById("todo-form");
   const input = document.getElementById("todo-input");
   const list = document.getElementById("todo-list");
+  const themeToggle = document.getElementById("theme-toggle");
 
   // Auth elements (simple email/password card)
   const emailAuthForm = document.getElementById("email-auth-form");
@@ -134,6 +135,25 @@
       completed: false,
     };
   }
+
+  // Theme handling
+  (function setupTheme() {
+    if (!themeToggle) return;
+    const THEME_KEY = "todoapp.theme";
+    function applyTheme(cls) {
+      document.documentElement.classList.toggle("light", cls === "light");
+      themeToggle.textContent = cls === "light" ? "🌙" : "☀️";
+    }
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved === "light" || saved === "dark") applyTheme(saved);
+    themeToggle.addEventListener("click", () => {
+      const next = document.documentElement.classList.contains("light")
+        ? "dark"
+        : "light";
+      localStorage.setItem(THEME_KEY, next);
+      applyTheme(next);
+    });
+  })();
 
   function render() {
     list.innerHTML = "";
