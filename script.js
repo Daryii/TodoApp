@@ -114,14 +114,9 @@
     }
   }
 
-  function currentUser() {
-    try {
-      const raw = localStorage.getItem(SESSION_KEY);
-      if (!raw) return null;
-      const session = JSON.parse(raw);
-      if (session && typeof session.username === "string")
-        return session.username;
-    } catch {}
+  async function currentUser() {
+    const sUser = await getSupabaseUser();
+    if (sUser) return sUser.email;
     return null;
   }
 
@@ -319,15 +314,8 @@
     localStorage.setItem(USER_DB_KEY, JSON.stringify(db));
   }
 
-  function setSession(username) {
-    localStorage.setItem(SESSION_KEY, JSON.stringify({ username }));
-  }
-  function clearSession() {
-    localStorage.removeItem(SESSION_KEY);
-  }
-
-  function updateAuthUI() {
-    const user = currentUser();
+  async function updateAuthUI() {
+    const user = await currentUser();
     if (authStatus) authStatus.textContent = user ? `Signed in as ${user}` : "";
     if (logoutButton) logoutButton.classList.toggle("hidden", !user);
     const authCard = document.getElementById("auth-card");
@@ -362,26 +350,30 @@
         }
         return;
       }
-      // If Supabase configured, use it; else fallback to local pseudo-auth keyed by email
-      if (window.supabaseClient) {
-        const { error } = signupMode
-          ? await window.supabaseClient.auth.signUp({ email, password })
-          : await window.supabaseClient.auth.signInWithPassword({
-              email,
-              password,
-            });
-        if (error) {
-          if (authError) {
-            authError.textContent = error.message;
-            authError.classList.remove("hidden");
-          }
-          return;
+      if (!window.supabaseClient) {
+        if (authError) {
+          authError.textContent =
+            "Supabase not configured. Check supabase-config.js";
+          authError.classList.remove("hidden");
         }
+        return;
       }
-      setSession(email);
-      const all = loadAllTodos();
-      todos = Array.isArray(all[email]) ? all[email].filter(isValidTodo) : [];
-      updateAuthUI();
+      const { data, error } = signupMode
+        ? await window.supabaseClient.auth.signUp({ email, password })
+        : await window.supabaseClient.auth.signInWithPassword({
+            email,
+            password,
+          });
+      if (error) {
+        if (authError) {
+          authError.textContent = error.message;
+          authError.classList.remove("hidden");
+        }
+        return;
+      }
+      // Load todos from Supabase
+      todos = await loadTodosFromStorage();
+      await updateAuthUI();
       render();
     });
   }
@@ -389,24 +381,24 @@
   // remove legacy signup form logic (now handled by emailAuthForm)
 
   if (logoutButton) {
-    logoutButton.addEventListener("click", () => {
-      clearSession();
+    logoutButton.addEventListener("click", async () => {
+      if (window.supabaseClient) await window.supabaseClient.auth.signOut();
       todos = [];
-      updateAuthUI();
+      await updateAuthUI();
       render();
     });
   }
 
-  // Initialize by session
+  // Initialize by checking Supabase session
   (async function init() {
-    const user = currentUser();
+    const user = await currentUser();
     if (user) {
       const fromStore = await loadTodosFromStorage();
       todos = Array.isArray(fromStore) ? fromStore : [];
     } else {
       todos = [];
     }
-    updateAuthUI();
+    await updateAuthUI();
     render();
   })();
 })();
