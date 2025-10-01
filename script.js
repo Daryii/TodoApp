@@ -365,6 +365,10 @@
             ? "Enter your email below to create your account"
             : "Enter your email below to login to your account";
         }
+        // Clear input fields when switching modes
+        if (authEmail) authEmail.value = "";
+        if (authPassword) authPassword.value = "";
+        if (authError) authError.classList.add("hidden");
       });
     }
 
