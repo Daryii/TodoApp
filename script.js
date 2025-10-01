@@ -9,11 +9,13 @@
 
   /** @type {{id:string, text:string, completed:boolean}[]} */
   let todos = [];
+  let currentFilter = "all"; // all, active, completed
 
   const form = document.getElementById("todo-form");
   const input = document.getElementById("todo-input");
   const list = document.getElementById("todo-list");
   const themeToggle = document.getElementById("theme-toggle");
+  const filterBtns = document.querySelectorAll(".filter-btn");
 
   // Auth elements (simple email/password card)
   const emailAuthForm = document.getElementById("email-auth-form");
@@ -150,17 +152,32 @@
     });
   })();
 
+  function getFilteredTodos() {
+    if (currentFilter === "active") return todos.filter((t) => !t.completed);
+    if (currentFilter === "completed") return todos.filter((t) => t.completed);
+    return todos;
+  }
+
   function render() {
     list.innerHTML = "";
-    if (todos.length === 0) {
+    const filtered = getFilteredTodos();
+
+    if (filtered.length === 0) {
       const empty = document.createElement("li");
       empty.className = "empty-state";
-      empty.textContent = "No todos yet. Add one above.";
+      if (todos.length === 0) {
+        empty.textContent = "No todos yet. Add one above.";
+      } else {
+        empty.textContent =
+          currentFilter === "active"
+            ? "No active todos."
+            : "No completed todos.";
+      }
       list.appendChild(empty);
       return;
     }
 
-    for (const todo of todos) {
+    for (const todo of filtered) {
       const li = document.createElement("li");
       li.className = "todo-item";
 
@@ -211,7 +228,8 @@
         render();
       });
 
-      deleteBtn.addEventListener("click", async () => {
+      deleteBtn.addEventListener("click", async (e) => {
+        e.stopPropagation();
         const ok = confirm("Delete this todo?");
         if (!ok) return;
         todos = todos.filter((t) => t.id !== todo.id);
@@ -326,6 +344,8 @@
 
   if (emailAuthForm) {
     let signupMode = false;
+    const cardTitle = emailAuthForm.querySelector("h2");
+    const cardSubtitle = emailAuthForm.querySelector(".muted");
     if (authToggle) {
       authToggle.addEventListener("click", () => {
         signupMode = !signupMode;
@@ -335,6 +355,16 @@
         authToggle.textContent = signupMode
           ? "Already have an account? Login"
           : "Don't have an account? Sign up";
+        if (cardTitle) {
+          cardTitle.textContent = signupMode
+            ? "Create your account"
+            : "Login to your account";
+        }
+        if (cardSubtitle) {
+          cardSubtitle.textContent = signupMode
+            ? "Enter your email below to create your account"
+            : "Enter your email below to login to your account";
+        }
       });
     }
 
@@ -388,6 +418,16 @@
       render();
     });
   }
+
+  // Filter buttons
+  filterBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      currentFilter = btn.dataset.filter;
+      filterBtns.forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      render();
+    });
+  });
 
   // Initialize by checking Supabase session
   (async function init() {

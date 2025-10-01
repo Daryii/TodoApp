@@ -243,6 +243,33 @@ input[type="password"]:focus {
   transform: translateY(1px);
 }
 
+/* Filters */
+.filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.filter-btn {
+  padding: 8px 14px;
+  background: transparent;
+  border: 1px solid #3a2d2d;
+  border-radius: 8px;
+  color: var(--text-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+  border-color: var(--accent-color);
+}
+
+.filter-btn.active {
+  background: var(--accent-color);
+  color: #000;
+  border-color: var(--accent-color);
+}
+
 ul#todo-list {
   list-style: none;
 }
@@ -301,6 +328,10 @@ li.todo-item {
   cursor: pointer;
   opacity: 0.8;
   transition: opacity 0.12s ease, transform 0.06s ease;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .delete-button:hover {
