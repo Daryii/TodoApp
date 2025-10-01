@@ -23,8 +23,6 @@
   const authPassword = document.getElementById("auth-password");
   const authToggle = document.getElementById("auth-toggle");
   const authError = document.getElementById("auth-error");
-  const authSuccess = document.getElementById("auth-success");
-  const forgotPasswordLink = document.getElementById("forgot-password");
   const appHeader = document.getElementById("app-header");
   const logoutButton = document.getElementById("logout-button");
   const appSection = document.getElementById("app-section");
@@ -371,55 +369,6 @@
         if (authEmail) authEmail.value = "";
         if (authPassword) authPassword.value = "";
         if (authError) authError.classList.add("hidden");
-        if (authSuccess) authSuccess.classList.add("hidden");
-        // Show/hide forgot password link
-        if (forgotPasswordLink) {
-          forgotPasswordLink.style.display = signupMode ? "none" : "block";
-        }
-      });
-    }
-
-    // Forgot password handler
-    if (forgotPasswordLink) {
-      forgotPasswordLink.addEventListener("click", async (e) => {
-        e.preventDefault();
-        if (authError) authError.classList.add("hidden");
-        if (authSuccess) authSuccess.classList.add("hidden");
-
-        const email = authEmail ? authEmail.value.trim() : "";
-        if (!email) {
-          if (authError) {
-            authError.textContent = "Please enter your email address first";
-            authError.classList.remove("hidden");
-          }
-          return;
-        }
-
-        if (!window.supabaseClient) {
-          if (authError) {
-            authError.textContent = "Supabase not configured";
-            authError.classList.remove("hidden");
-          }
-          return;
-        }
-
-        const { error } =
-          await window.supabaseClient.auth.resetPasswordForEmail(email, {
-            redirectTo: window.location.origin,
-          });
-
-        if (error) {
-          if (authError) {
-            authError.textContent = error.message;
-            authError.classList.remove("hidden");
-          }
-        } else {
-          if (authSuccess) {
-            authSuccess.textContent =
-              "Password reset email sent! Check your inbox.";
-            authSuccess.classList.remove("hidden");
-          }
-        }
       });
     }
 
