@@ -26,8 +26,8 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[var(--bg-start)] to-[var(--bg-end)] p-4 text-white">
       <div className="max-w-2xl mx-auto">
-        <div className="flex justify-between items-center mb-6 mt-8">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-white to-[#ff5722] bg-clip-text text-transparent">
+        <div className="flex justify-between items-center gap-4 mb-6 mt-4 sm:mt-8">
+          <h1 className="text-3xl sm:text-5xl font-bold bg-gradient-to-r from-white to-[#ff5722] bg-clip-text text-transparent flex-shrink">
             Todo App ✅
           </h1>
           <LogoutButton />

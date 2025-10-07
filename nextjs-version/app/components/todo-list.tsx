@@ -38,10 +38,10 @@ export function TodoList({ initialTodos }: { initialTodos: Todo[] }) {
     if (!user) return;
 
     setLoading("add");
-    
+
     // Generate custom ID (text type in DB)
     const todoId = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-    
+
     const { data, error } = await supabase
       .from("todos")
       .insert({
