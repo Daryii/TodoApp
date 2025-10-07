@@ -38,9 +38,14 @@ export function TodoList({ initialTodos }: { initialTodos: Todo[] }) {
     if (!user) return;
 
     setLoading("add");
+    
+    // Generate custom ID (text type in DB)
+    const todoId = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+    
     const { data, error } = await supabase
       .from("todos")
       .insert({
+        id: todoId,
         text: newTodo.trim(),
         user_id: user.id,
         completed: false,
@@ -54,7 +59,8 @@ export function TodoList({ initialTodos }: { initialTodos: Todo[] }) {
       setNewTodo("");
       toast.success("Todo added!");
     } else {
-      toast.error("Failed to add todo");
+      console.error("Add todo error:", error);
+      toast.error(error?.message || "Failed to add todo");
     }
   }
 
