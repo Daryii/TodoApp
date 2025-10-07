@@ -165,24 +165,24 @@ export function TodoList({ initialTodos }: { initialTodos: Todo[] }) {
           placeholder="Add a todo"
           maxLength={200}
           disabled={loading === "add"}
-          className="flex-1 bg-transparent border border-[#3a2d2d] rounded-lg px-3 py-2.5 text-white placeholder-gray-500 focus:border-[#ff5722] focus:shadow-[0_0_0_3px_rgba(255,87,34,0.4)] outline-none transition-all disabled:opacity-50"
+          className="flex-1 bg-transparent border border-[#3a2d2d] rounded-lg px-3 py-2.5 text-white placeholder-gray-500 focus:border-[#ff5722] focus:shadow-[0_0_0_3px_rgba(255,87,34,0.4)] outline-none transition-all disabled:opacity-50 text-sm sm:text-base"
         />
         <button
           type="submit"
           disabled={loading === "add"}
-          className="bg-gradient-to-r from-[#ff5722] to-[#f4511e] text-white font-semibold px-5 py-2.5 rounded-lg hover:brightness-105 hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-50 min-w-[70px]"
+          className="bg-gradient-to-r from-[#ff5722] to-[#f4511e] text-white font-semibold px-4 sm:px-5 py-2.5 rounded-lg hover:brightness-105 hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-50 min-w-[60px] sm:min-w-[70px] text-sm sm:text-base"
         >
           {loading === "add" ? "..." : "ADD"}
         </button>
       </form>
 
-      <div className="flex justify-between items-center">
-        <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
+        <div className="flex gap-2 flex-wrap">
           {(["all", "active", "completed"] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-3.5 py-2 rounded-lg border transition-all capitalize ${
+              className={`px-4 sm:px-3.5 py-2 rounded-lg border transition-all capitalize text-sm sm:text-base flex-1 sm:flex-none ${
                 filter === f
                   ? "bg-[#ff5722] text-black border-[#ff5722]"
                   : "border-[#3a2d2d] text-white hover:border-[#ff5722]"
@@ -197,7 +197,7 @@ export function TodoList({ initialTodos }: { initialTodos: Todo[] }) {
           <button
             onClick={bulkDeleteCompleted}
             disabled={loading === "bulk-delete"}
-            className="text-sm text-gray-400 hover:text-[#ff5722] transition-colors disabled:opacity-50"
+            className="text-sm text-gray-400 hover:text-[#ff5722] transition-colors disabled:opacity-50 text-center sm:text-right whitespace-nowrap py-1"
           >
             {loading === "bulk-delete"
               ? "Deleting..."
@@ -219,7 +219,7 @@ export function TodoList({ initialTodos }: { initialTodos: Todo[] }) {
           filteredTodos.map((todo) => (
             <li
               key={todo.id}
-              className="flex items-center gap-2 py-3 border-b border-[#2a2020]"
+              className="flex items-center gap-2 sm:gap-3 py-3 border-b border-[#2a2020]"
             >
               <input
                 type="checkbox"
@@ -260,7 +260,7 @@ export function TodoList({ initialTodos }: { initialTodos: Todo[] }) {
                 <>
                   <span
                     onDoubleClick={() => startEdit(todo)}
-                    className={`flex-1 cursor-pointer ${
+                    className={`flex-1 cursor-pointer text-sm sm:text-base break-words ${
                       todo.completed ? "line-through opacity-60" : ""
                     }`}
                     title="Double-click to edit"
@@ -272,14 +272,15 @@ export function TodoList({ initialTodos }: { initialTodos: Todo[] }) {
                       e.stopPropagation();
                       deleteTodo(todo.id);
                     }}
-                    className="p-1 opacity-80 hover:opacity-100 transition-opacity"
+                    className="p-1.5 opacity-80 hover:opacity-100 transition-opacity flex-shrink-0"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      height="24px"
+                      height="20px"
                       viewBox="0 -960 960 960"
-                      width="24px"
+                      width="20px"
                       fill="#e3e3e3"
+                      className="sm:h-6 sm:w-6"
                     >
                       <path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z" />
                     </svg>
