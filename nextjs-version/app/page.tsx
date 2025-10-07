@@ -24,7 +24,7 @@ export default async function HomePage() {
     .order("created_at", { ascending: false });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1a1625] to-[#0f0a18] p-4">
+    <div className="min-h-screen bg-gradient-to-br from-[var(--bg-start)] to-[var(--bg-end)] p-4 text-white">
       <div className="max-w-2xl mx-auto">
         <div className="flex justify-between items-center mb-6 mt-8">
           <h1 className="text-5xl font-bold bg-gradient-to-r from-white to-[#ff5722] bg-clip-text text-transparent">
@@ -34,7 +34,7 @@ export default async function HomePage() {
         </div>
 
         <div className="backdrop-blur-xl bg-[rgba(31,23,35,0.7)] border border-white/10 rounded-2xl p-6 shadow-[0_16px_48px_rgba(0,0,0,0.5)]">
-          <p className="text-gray-300 mb-4">
+          <p className="text-white mb-4">
             Signed in as <span className="text-[#ff5722]">{user.email}</span>
           </p>
 
