@@ -24,10 +24,10 @@ export default async function HomePage() {
     .order("created_at", { ascending: false });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[var(--bg-start)] to-[var(--bg-end)] p-4 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-[var(--bg-start)] to-[var(--bg-end)] p-4 text-white pt-16 sm:pt-4">
       <div className="max-w-2xl mx-auto">
-        <div className="flex justify-between items-center gap-4 mb-6 mt-4 sm:mt-8">
-          <h1 className="text-3xl sm:text-5xl font-bold bg-gradient-to-r from-white to-[#ff5722] bg-clip-text text-transparent flex-shrink">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6 mt-0 sm:mt-8">
+          <h1 className="text-3xl sm:text-5xl font-bold bg-gradient-to-r from-white to-[#ff5722] bg-clip-text text-transparent">
             Todo App ✅
           </h1>
           <LogoutButton />
