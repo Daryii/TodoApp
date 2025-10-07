@@ -47,6 +47,13 @@ body {
   color: #6b7280 !important;
 }
 
+/* Fix gradient text visibility in light mode */
+:root.light .bg-gradient-to-r {
+  background: linear-gradient(135deg, #1a1a1a 0%, #ff5722 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
 :root.light .border-\[\#3a2d2d\] {
   border-color: rgba(0, 0, 0, 0.15) !important;
 }
@@ -61,4 +68,14 @@ body {
 
 :root.light .border-\[rgba\(74\,55\,55\,0\.5\)\] {
   border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Light mode button fixes */
+:root.light .bg-\[\#3c2f2f\] {
+  background: #e9e9ee !important;
+  border-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+:root.light .border-\[\#4a3a3a\] {
+  border-color: rgba(0, 0, 0, 0.15) !important;
 }
